@@ -1,10 +1,10 @@
-#######################################
-###                                 ###
-### Author: Vital                   ###
-### Date: February 22nd, 2024       ###
-### Version: 1.0                    ###
-###                                 ###
-#######################################
+-- #######################################
+-- ###                                 ###
+-- ### Author: Vital                   ###
+-- ### Date: February 22nd, 2024       ###
+-- ### Version: 1.0                    ###
+-- ###                                 ###
+-- #######################################
 
 /*
   * --- General Rules ---
@@ -19,12 +19,13 @@
 CREATE SCHEMA IF NOT EXISTS billspace;
 
 SET NAMES 'UTF8MB4';
-SET TIME_ZONE = 'EU/Eastern';
+-- SET TIME_ZONE = 'EU/Eastern';
+
 USE billspace;
 
 
-DROP TABLE IF EXISTS USERS;
-CREATE TABLE USERS
+DROP TABLE IF EXISTS Users;
+CREATE TABLE Users
 (
   ID               BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   FIRST_NAME       VARCHAR(50) NOT NULL,
@@ -44,8 +45,8 @@ CREATE TABLE USERS
 );
 
 
-DROP TABLE IF EXISTS ROLES;
-CREATE TABLE ROLES
+DROP TABLE IF EXISTS Roles;
+CREATE TABLE Roles
 (
     ID          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     NAME        VARCHAR(50) NOT NULL UNIQUE,
@@ -66,8 +67,8 @@ CREATE TABLE UserRoles
 );
 
 
-DROP TABLE IF EXISTS EVENTS;
-CREATE TABLE EVENTS
+DROP TABLE IF EXISTS Events;
+CREATE TABLE Events
 (
     ID          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     TYPE        VARCHAR(50) NOT NULL CHECK ( TYPE IN ('LOGIN_ATTEMPT', 'LOGIN_ATTEMPT_FAILURE', 'LOGIN_ATTEMPT_SUCCESS', 'PROFILE_UPDATE', 'PROFILE_PICTURE_UPDATE', 'ROLE_UPDATE', 'PASSWORD_UPDATE', 'ACCOUNT_SETTINGS_UPDATE', 'MFA_UPDATE') ),
@@ -95,10 +96,10 @@ CREATE TABLE AccountVerifications
 (
     ID          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     USER_ID     BIGINT UNSIGNED NOT NULL,
-    URL         VARCHAR(255) NOT NULL,
+    TOKEN         VARCHAR(255) NOT NULL,
     expiration_date   DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (USER_ID) REFERENCES USERS(ID) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT UQ_AccountVerifications_URL UNIQUE (URL),
+    CONSTRAINT UQ_AccountVerifications_URL UNIQUE (TOKEN),
     CONSTRAINT UQ_AccountVerifications_USER_ID UNIQUE (USER_ID)
 );
 
@@ -108,10 +109,10 @@ CREATE TABLE ResetPasswordVerifications
 (
     ID               BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     USER_ID          BIGINT UNSIGNED NOT NULL,
-    URL              VARCHAR(255) NOT NULL,
+    TOKEN              VARCHAR(255) NOT NULL,
     expiration_date  DATETIME NOT NULL,
     FOREIGN KEY (USER_ID) REFERENCES USERS(ID) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT UQ_ResetPasswordVerifications_URL UNIQUE (URL),
+    CONSTRAINT UQ_ResetPasswordVerifications_URL UNIQUE (TOKEN),
     CONSTRAINT UQ_ResetPasswordVerifications_USER_ID UNIQUE (USER_ID)
 );
 
@@ -127,6 +128,13 @@ CREATE TABLE TwoFactorVerifications
     CONSTRAINT UQ_TwoFactorVerifications_CODE UNIQUE (CODE),
     CONSTRAINT UQ_TwoFactorVerifications_USER_ID UNIQUE (USER_ID)
 );
+
+
+Insert Into Roles (name, permissions)
+Values('ROLE_USER', 'READ:USER,READ:CUSTOMER'),
+      ('ROLE_MANAGER', 'READ:USER,READ:CUSTOMER,UPDATE:USER,UPDATE:CUSTOMER'),
+      ('ROLE_ADMIN', 'READ:USER,READ:CUSTOMER,UPDATE:USER,UPDATE:CUSTOMER,CREATE:USER,CREATE:CUSTOMER'),
+      ('ROLE_SYSADMIN', 'READ:USER,READ:CUSTOMER,UPDATE:USER,UPDATE:CUSTOMER,CREATE:USER,CREATE:CUSTOMER,DELETE:USER,DELETE:CUSTOMER');
 
 
 

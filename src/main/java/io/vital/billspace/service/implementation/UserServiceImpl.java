@@ -11,10 +11,15 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-    private final UserRepository<User> userUserRepository;
+    private final UserRepository<User> userRepository;
 
     @Override
     public UserDto createUser(User user) {
-        return UserDtoMapper.of(userUserRepository.create(user));
+        return UserDtoMapper.of(userRepository.create(user));
+    }
+
+    @Override
+    public Boolean verifyUser(String token) {
+        return userRepository.verifyUserByToken(token);
     }
 }

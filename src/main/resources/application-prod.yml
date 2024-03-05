@@ -1,0 +1,22 @@
+spring:
+  #autoconfigure:
+  #  exclude: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+  datasource:
+    url: jdbc:mysql://prodUrl:3306/billspace
+    password: pilamaria18.!!
+    username: root
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL8InnoDBDialect
+    generate-ddl: true
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        globally-quoted_identifiers: true
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+  sql:
+    init:
+      mode: always
+      continue-on-error: false

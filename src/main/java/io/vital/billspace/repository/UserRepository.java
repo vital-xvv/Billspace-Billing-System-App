@@ -6,7 +6,6 @@ import java.util.Collection;
 
 public interface UserRepository<T extends User> {
     /*Basic CRUD Operations*/
-
     T create(T entity);
     Collection<T> list(int page, int pageSize);
     T get(Long id);
@@ -14,5 +13,5 @@ public interface UserRepository<T extends User> {
     Boolean delete(T entity);
 
     /*Complex SQL queries*/
-
+    Boolean verifyUserByToken(String token);
 }

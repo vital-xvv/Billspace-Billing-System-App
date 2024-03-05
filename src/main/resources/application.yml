@@ -1,22 +1,54 @@
 spring:
-  autoconfigure:
-    exclude: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+
+  profiles:
+    active: ${ACTIVE_PROFILE:dev}
+
+
   datasource:
-    url: jdbc:mysql://localhost:3306/billspace
-    password: pilamaria18.!!
-    username: root
+    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DB}?useSSL=false
+    password: ${MYSQL_DB_PASSWORD}
+    username: ${MYSQL_DB_USERNAME}
+
   jpa:
-    database-platform: org.hibernate.dialect.MySQL8InnoDBDialect
-    generate-ddl: true
     show-sql: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     properties:
       hibernate:
-        globally-quoted_identifiers: true
-        dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
+    defer-datasource-initialization: true
+
   sql:
     init:
       mode: always
       continue-on-error: false
+
+
+  mail:
+    host: ${EMAIL_HOST}
+    port: ${EMAIL_PORT}
+    username: ${EMAIL_ID}
+    password: ${EMAIL_PASSWORD}
+    default-encoding: UTF-8
+    properties:
+      mail:
+        mime:
+          charset: UTF
+        smtp:
+          writetimeout: 10000
+          connectiontimeout: 10000
+          timeout: 10000
+          auth: true
+          starttls:
+            enable: true
+            required: true
+    verify:
+      host: ${VERIFY_EMAIL_HOST}
+
+
+
+application:
+  title: Billspace
+  version: 1.0
+server:
+  port: ${SERVER_PORT}

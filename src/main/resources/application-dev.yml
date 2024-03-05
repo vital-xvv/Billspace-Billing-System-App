@@ -1,0 +1,18 @@
+#Server
+ACTIVE_PROFILE: dev
+SERVER_PORT: 8000
+
+#Database
+MYSQL_HOST: localhost
+MYSQL_PORT: 3306
+MYSQL_DB: billspace
+MYSQL_DB_PASSWORD: pilamaria18.!!
+MYSQL_DB_USERNAME: root
+
+# Email config
+EMAIL_HOST: smtp.gmail.com
+EMAIL_PORT: 587
+EMAIL_ID: vital.xvv@gmail.com
+EMAIL_PASSWORD: uwej bggn ipeb fiec
+VERIFY_EMAIL_HOST: http://localhost:${SERVER_PORT}
+
