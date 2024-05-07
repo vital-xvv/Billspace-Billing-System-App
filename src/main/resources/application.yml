@@ -1,8 +1,6 @@
 spring:
-
   profiles:
-    active: ${ACTIVE_PROFILE:dev}
-
+    active: @spring.profiles.active@
 
   datasource:
     url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DB}?useSSL=false
@@ -12,15 +10,15 @@ spring:
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: true
-    defer-datasource-initialization: true
+    generate-ddl: true
 
   sql:
     init:
-      mode: always
+      mode: never
       continue-on-error: false
 
 

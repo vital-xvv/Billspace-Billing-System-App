@@ -1,15 +1,15 @@
 package io.vital.billspace.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 
+@Setter
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@Builder
 public class UserDto {
     private Long id;
     private String firstName;
@@ -24,4 +24,6 @@ public class UserDto {
     private boolean isNotLocked;
     private boolean isUsingMFA;
     private LocalDateTime createdAt;
+    private String roleName;
+    private String permissions;
 }
