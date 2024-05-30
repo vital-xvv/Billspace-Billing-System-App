@@ -1,5 +1,7 @@
 package io.vital.billspace.model;
 
+import io.vital.billspace.dto.UserDto;
+import io.vital.billspace.dto.dtomapper.UserDtoMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -11,11 +13,11 @@ import java.util.Collection;
 @RequiredArgsConstructor
 public class UserPrincipal implements UserDetails {
     private final User user;
-    private final String permissions;
+    private final Role role;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Arrays.stream(permissions.split(",".trim())).map(SimpleGrantedAuthority::new).toList();
+        return Arrays.stream(role.getPermission().split(",".trim())).map(SimpleGrantedAuthority::new).toList();
     }
 
     @Override
@@ -46,5 +48,9 @@ public class UserPrincipal implements UserDetails {
     @Override
     public boolean isEnabled() {
         return user.isEnabled();
+    }
+
+    public UserDto getUser(){
+        return UserDtoMapper.of(user, role);
     }
 }

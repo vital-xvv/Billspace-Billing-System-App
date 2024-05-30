@@ -43,8 +43,6 @@ spring:
     verify:
       host: ${VERIFY_EMAIL_HOST}
 
-
-
 application:
   title: Billspace
   version: 1.0

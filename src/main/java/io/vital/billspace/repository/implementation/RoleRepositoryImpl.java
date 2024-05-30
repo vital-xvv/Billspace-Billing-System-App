@@ -3,18 +3,16 @@ package io.vital.billspace.repository.implementation;
 import io.vital.billspace.exception.APIException;
 import io.vital.billspace.model.Role;
 import io.vital.billspace.repository.RoleRepository;
+import io.vital.billspace.rowmapper.RoleRowMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
-import io.vital.billspace.rowmapper.RoleRowMapper;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 
-import static io.vital.billspace.enumeration.RoleType.ROLE_USER;
 import static io.vital.billspace.query.RoleQuery.*;
 
 @Repository
@@ -86,6 +84,17 @@ public class RoleRepositoryImpl implements RoleRepository<Role> {
         // If any error occurs, throw exception with a proper message
         }catch (Exception e) {
             throw new APIException("Error occurred. Please try again. Adding role" + e.getMessage());
+        }
+    }
+
+    @Override
+    public Collection<Role> getRoles() {
+        log.info("Fetching all roles.");
+        try {
+            return jdbcTemplate.query(SELECT_ROLES_QUERY, new RoleRowMapper());
+        }catch (Exception e){
+            log.error(e.getMessage());
+            throw new APIException("Error occurred retrieving all roles. Please try again.");
         }
     }
 }

@@ -18,37 +18,34 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
+import static io.vital.billspace.utils.ExceptionUtils.processError;
 import static java.util.Optional.ofNullable;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class CustomAuthorizationFilter extends OncePerRequestFilter {
-    private static final String[] PUBLIC_ROUTES = {"/user/login", "/user/verify/code", "/user/register"};
+    private static final String[] PUBLIC_ROUTES = {"/user/login", "/user/verify/code", "/user/register",
+            "/user/refresh/token", "/user/image"};
     private final TokenProvider tokenProvider;
-    public static final String TOKEN_KEY = "token";
     public static final String TOKEN_PREFIX = "Bearer ";
-    public static final String EMAIL_KEY = "email";
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         try{
-            Map<String, String> values = getRequestValues(request);
+            Long userId = getUserId(request);
             String token = getToken(request);
-            if(tokenProvider.isTokenValid(values.get(EMAIL_KEY), token)){
-                List<GrantedAuthority> authorities = tokenProvider.getAuthorities(values.get(TOKEN_KEY));
-                Authentication authentication = tokenProvider.getAuthentication(values.get(EMAIL_KEY),
-                        authorities, request);
+            if(tokenProvider.isTokenValid(userId, token)){
+                List<GrantedAuthority> authorities = tokenProvider.getAuthorities(token);
+                Authentication authentication = tokenProvider.getAuthentication(userId, authorities, request);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } else { SecurityContextHolder.clearContext(); }
             filterChain.doFilter(request, response);
         }catch (Exception e){
             log.error(e.getMessage());
-            //TODO
-            //processError(request, response, e);
+            processError(request, response, e);
         }
     }
 
@@ -66,9 +63,7 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
                 Arrays.asList(PUBLIC_ROUTES).contains(request.getRequestURI());
     }
 
-    private Map<String, String> getRequestValues(HttpServletRequest request) {
-        return Map.of(EMAIL_KEY, tokenProvider.getSubject(getToken(request), request), TOKEN_KEY, getToken(request));
+    private Long getUserId(HttpServletRequest request) {
+        return tokenProvider.getSubject(getToken(request), request);
     }
-
-
 }

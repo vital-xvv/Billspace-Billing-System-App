@@ -6,9 +6,10 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.InvalidClaimException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
-import io.micrometer.common.util.StringUtils;
 import io.vital.billspace.model.UserPrincipal;
+import io.vital.billspace.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -21,13 +22,16 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static java.lang.System.currentTimeMillis;
 
 @Component
+@RequiredArgsConstructor
 public class TokenProvider {
-    private static final long ACCESS_TOKEN_EXPIRATION_TIME = 1_800_000;
+    private final UserService userService;
+    private static final long ACCESS_TOKEN_EXPIRATION_TIME = 432_000_000;//1_800_0000;
     private static final String AUTHORITIES = "authorities";
     private static final long REFRESH_TOKEN_EXPIRATION_TIME = 432_000_000;
     @Value("${jwt.secret}")
@@ -39,14 +43,14 @@ public class TokenProvider {
     public String createAccessToken(UserPrincipal userPrincipal){
         String[] claims = getClaimsFromUser(userPrincipal);
         return JWT.create().withIssuer(appName).withAudience(DESCRIPTION).withIssuedAt(Instant.now())
-                .withSubject(userPrincipal.getUsername()).withArrayClaim(AUTHORITIES, claims)
+                .withSubject(String.valueOf(userPrincipal.getUser().getId())).withArrayClaim(AUTHORITIES, claims)
                 .withExpiresAt(new Date(currentTimeMillis() + ACCESS_TOKEN_EXPIRATION_TIME))
                 .sign(Algorithm.HMAC512(secret));
     }
 
     public String createRefreshToken(UserPrincipal userPrincipal){
         return JWT.create().withIssuer(appName).withAudience(DESCRIPTION).withIssuedAt(Instant.now())
-                .withSubject(userPrincipal.getUsername())
+                .withSubject(String.valueOf(userPrincipal.getUser().getId()))
                 .withExpiresAt(new Date(currentTimeMillis() + REFRESH_TOKEN_EXPIRATION_TIME))
                 .sign(Algorithm.HMAC512(secret));
     }
@@ -82,17 +86,17 @@ public class TokenProvider {
         return verifier;
     }
 
-    public Authentication getAuthentication(String email, List<GrantedAuthority> authorities,
+    public Authentication getAuthentication(Long userId, List<GrantedAuthority> authorities,
                                             HttpServletRequest request){
         UsernamePasswordAuthenticationToken userPasswordAuthToken =
-                new UsernamePasswordAuthenticationToken(email, null, authorities);
+                new UsernamePasswordAuthenticationToken(userService.getUserById(userId), null, authorities);
         userPasswordAuthToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         return userPasswordAuthToken;
     }
 
-    public boolean isTokenValid(String email, String token){
+    public boolean isTokenValid(Long userId, String token){
         JWTVerifier verifier = getJWTVerifier();
-        return StringUtils.isNotEmpty(email) && !isTokenExpired(verifier, token);
+        return !Objects.isNull(userId) && !isTokenExpired(verifier, token);
     }
 
     private boolean isTokenExpired(JWTVerifier verifier, String token) {
@@ -100,10 +104,10 @@ public class TokenProvider {
         return expiration.before(new Date());
     }
 
-    public String getSubject(String token, HttpServletRequest request){
+    public Long getSubject(String token, HttpServletRequest request){
         JWTVerifier verifier = getJWTVerifier();
         try{
-            return verifier.verify(token).getSubject();
+            return Long.parseLong(verifier.verify(token).getSubject());
         }catch (TokenExpiredException ex){
             request.setAttribute("expiredMessage", ex.getMessage());
             throw ex;

@@ -9,7 +9,7 @@
     - Capability to update user detail information
 
 2. User reset password(without being logged in)
-    - Password reset link should expire withing 2 hours
+    - Password reset link should expire withing 24 hours
 
 3. User login (using email and password)
     - Token based authentication (JWT Token)
